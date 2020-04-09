@@ -1,6 +1,7 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import Card from "./Card";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           Learn React now beezy whaaaaaatt!!
         </a>
       </header>
+      <Card name="Phaed the Untouchable" />
     </div>
   );
 }
