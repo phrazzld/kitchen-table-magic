@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import Frame from "./Frame";
 
 interface ICard {
   name: string;
@@ -15,7 +14,6 @@ const Card = (props: ICard) => {
         `https://api.scryfall.com/cards/search?q=${props.name}`
       );
       setCardData(res.data.data[0]);
-      console.log("cardData:", res);
     };
 
     goSetCardData(props.name);
@@ -23,27 +21,17 @@ const Card = (props: ICard) => {
 
   if (cardData) {
     return (
-      <Frame>
-        <h4>Name</h4>
-        <p>Name: {cardData.name}</p>
-        <p>Image: </p>
-        <img
-          src={cardData.image_uris.png}
-          alt={`${cardData.name}: ${cardData.type_line}`}
-        />
-        <p>Type: {cardData.type_line}</p>
-        <p>Oracle Text: {cardData.oracle_text}</p>
-        <p>Power: {cardData.power}</p>
-        <p>Toughness: {cardData.toughness}</p>
-      </Frame>
+      <img
+        src={cardData.image_uris.png}
+        alt={`${cardData.name}: ${cardData.type_line}`}
+        style={{
+          height: "25em"
+        }}
+      />
     );
   }
 
-  return (
-    <Frame>
-      <p>{props.name}</p>
-    </Frame>
-  );
+  return <p>Loading {props.name}</p>;
 };
 
 export default Card;
