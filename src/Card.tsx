@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import _ from "lodash";
 
 interface ICard {
   name: string;
@@ -16,7 +17,10 @@ const Card = (props: ICard) => {
       setCardData(res.data.data[0]);
     };
 
-    goSetCardData(props.name);
+    const debounced = _.debounce(goSetCardData.bind(props.name), 1100, {
+      leading: true
+    });
+    debounced(props.name);
   }, [props.name]);
 
   if (cardData) {
