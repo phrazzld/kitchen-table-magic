@@ -4,98 +4,52 @@ import Card from "./Card";
 type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
 
 type CardData = {
+  id: string;
   name: string;
   zone: Zone;
 };
 
-interface IBattlefield {
-  cards: Array<string>;
-}
-
-const Battlefield = (props: IBattlefield) => {
-  const handleClick = (): void => {
-    console.log("Battlefield::handleClick");
-  };
-
-  return (
-    <div>
-      <h4>Battlefield</h4>
-      {props.cards.map(card => (
-        <Card name={card} click={handleClick} />
-      ))}
-    </div>
+const generateId = (): string => {
+  return "_".concat(
+    Math.random()
+      .toString(36)
+      .substr(2, 9)
   );
 };
 
-interface IPile {
-  name: string;
-  cards: Array<string>;
-  showTopCard: boolean;
-}
-
-const Pile = (props: IPile) => {
-  const topCard = props.cards[props.cards.length - 1];
-  const showTopCard = props.showTopCard && topCard;
-
-  const handleClick = () => {
-    console.log("Pile::handleClick");
-  };
-
-  return (
-    <div
-      style={{
-        flex: 1,
-        border: "1px solid brown",
-        margin: "0.5em",
-        padding: "0.5em"
-      }}
-    >
-      <h4>{props.name}</h4>
-      {showTopCard && <Card name={topCard} click={handleClick} />}
-    </div>
-  );
+type Coordinates = {
+  top: number;
+  left: number;
 };
 
-interface IHand {
-  cards: Array<string>;
-}
-
-const Hand = (props: IHand) => {
-  const handleClick = () => {
-    console.log("Hand::handleClick");
-  };
-
-  return (
-    <div>
-      <h4>Hand</h4>
-      {props.cards.map(card => (
-        <Card name={card} click={handleClick} />
-      ))}
-    </div>
-  );
+type ActiveCardMenu = {
+  card: CardData;
+  coordinates: Coordinates;
 };
 
-interface IBoard {}
-
-const Board = (props: IBoard) => {
+const Board = () => {
   const [cards, setCards] = React.useState<Array<CardData>>([
-    { name: "Phage the Untouchable", zone: "BATTLEFIELD" },
-    { name: "Dark Ritual", zone: "HAND" },
-    { name: "Underworld Dreams", zone: "BATTLEFIELD" },
-    { name: "Swamp", zone: "GRAVEYARD" },
-    { name: "Yawgmoth, Thran Physician", zone: "EXILE" },
-    { name: "Mox Opal", zone: "LIBRARY" }
+    { id: generateId(), name: "Phage the Untouchable", zone: "BATTLEFIELD" },
+    { id: generateId(), name: "Dark Ritual", zone: "HAND" },
+    { id: generateId(), name: "Underworld Dreams", zone: "BATTLEFIELD" },
+    { id: generateId(), name: "Swamp", zone: "GRAVEYARD" },
+    { id: generateId(), name: "Yawgmoth, Thran Physician", zone: "EXILE" },
+    { id: generateId(), name: "Mox Opal", zone: "LIBRARY" },
+    { id: generateId(), name: "Swamp", zone: "LIBRARY" },
+    { id: generateId(), name: "Swamp", zone: "LIBRARY" }
   ]);
+  const [
+    activeCardMenu,
+    setActiveCardMenu
+  ] = React.useState<ActiveCardMenu | null>(null);
 
-  const getCardsForZone = (zone: Zone): Array<string> => {
-    return cards
-      .filter((card: CardData) => card.zone === zone)
-      .map((card: CardData) => card.name);
+  const getCardsForZone = (zone: Zone): Array<CardData> => {
+    return cards.filter((card: CardData) => card.zone === zone);
   };
 
-  const moveCardToZone = (name: string, zone: Zone): void => {
+  const moveCardToZone = (id: string, zone: Zone): void => {
     const updatedCards = cards.map((card: CardData) => {
-      if (card.name === name) {
+      if (card.id === id) {
         return { ...card, zone: zone };
       } else {
         return card;
@@ -104,21 +58,153 @@ const Board = (props: IBoard) => {
     setCards(updatedCards);
   };
 
-  const mockBattlefield: string[] = getCardsForZone("BATTLEFIELD");
-  const mockLibrary: string[] = getCardsForZone("LIBRARY");
-  const mockGraveyard: string[] = getCardsForZone("GRAVEYARD");
-  const mockExile: string[] = getCardsForZone("EXILE");
-  const mockHand: string[] = getCardsForZone("HAND");
+  const mockBattlefield: Array<CardData> = getCardsForZone("BATTLEFIELD");
+  const mockLibrary: Array<CardData> = getCardsForZone("LIBRARY");
+  const mockGraveyard: Array<CardData> = getCardsForZone("GRAVEYARD");
+  const mockExile: Array<CardData> = getCardsForZone("EXILE");
+  const mockHand: Array<CardData> = getCardsForZone("HAND");
+
+  const handleClick = (event: any, card: CardData): void => {
+    console.log("Board::handleClick:card:", card);
+    console.log("event:", event);
+    console.log(
+      "event.currentTarget.getBoundingClientRect:",
+      event.currentTarget.getBoundingClientRect()
+    );
+    // show actions for that card
+    setActiveCardMenu({
+      card: card,
+      coordinates: {
+        top: event.currentTarget.getBoundingClientRect().y,
+        left: event.currentTarget.getBoundingClientRect().x
+      }
+    });
+  };
+
+  const getZones = (): Array<Zone> => {
+    const zones: Array<Zone> = [
+      "BATTLEFIELD",
+      "LIBRARY",
+      "HAND",
+      "GRAVEYARD",
+      "EXILE"
+    ];
+    return zones;
+  };
+
+  interface ICardMenu {
+    cardId: string;
+    coordinates: Coordinates;
+  }
+
+  const CardMenu = (props: ICardMenu) => {
+    return (
+      <div
+        className="card-menu"
+        style={{
+          position: "absolute",
+          top: `${props.coordinates.top + 25}px`,
+          left: `${props.coordinates.left}px`,
+          border: "1px solid black",
+          margin: "0.5em"
+        }}
+      >
+        {getZones().map((zone: Zone) => {
+          return (
+            <div>
+              <button
+                onClick={() => {
+                  moveCardToZone(props.cardId, zone);
+                  setActiveCardMenu(null);
+                }}
+              >
+                Send to {zone.toString()}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Battlefield cards={mockBattlefield} />
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <Pile name="Library" cards={mockLibrary} showTopCard={false} />
-        <Pile name="Graveyard" cards={mockGraveyard} showTopCard={true} />
-        <Pile name="Exile" cards={mockExile} showTopCard={true} />
+      {activeCardMenu && (
+        <CardMenu
+          cardId={activeCardMenu.card.id}
+          coordinates={activeCardMenu.coordinates}
+        />
+      )}
+      <div className="battlefield">
+        <h4>Battlefield</h4>
+        {mockBattlefield.map(card => (
+          <Card
+            key={card.id}
+            name={card.name}
+            click={event => handleClick(event, card)}
+          />
+        ))}
       </div>
-      <Hand cards={mockHand} />
+      <div className="piles" style={{ display: "flex", flexDirection: "row" }}>
+        <div
+          className="library"
+          style={{
+            flex: 1,
+            border: "2px solid brown",
+            margin: "0.5em",
+            padding: "0.5em"
+          }}
+        >
+          <h4>Library</h4>
+          <h2>{mockLibrary.length}</h2>
+        </div>
+        <div
+          className="graveyard"
+          style={{
+            flex: 1,
+            border: "2px solid brown",
+            margin: "0.5em",
+            padding: "0.5em"
+          }}
+        >
+          <h4>Graveyard</h4>
+          {mockGraveyard[0] && (
+            <Card
+              name={mockGraveyard[0].name}
+              click={event => handleClick(event, mockGraveyard[0])}
+            />
+          )}
+        </div>
+        <div
+          className="exile"
+          style={{
+            flex: 1,
+            border: "2px solid brown",
+            margin: "0.5em",
+            padding: "0.5em"
+          }}
+        >
+          <h4>Exile</h4>
+          {mockExile[0] && (
+            <Card
+              name={mockExile[0].name}
+              click={event => handleClick(event, mockExile[0])}
+            />
+          )}
+        </div>
+      </div>
+      <div className="hand">
+        <div className="library">
+          <h4>Hand</h4>
+          {mockHand.map(card => (
+            <Card
+              key={card.id}
+              name={card.name}
+              click={event => handleClick(event, card)}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

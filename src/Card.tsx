@@ -14,7 +14,7 @@ const getCardImage = (cardDataBlob: any) => {
 
 interface ICard {
   name: string;
-  click: () => void;
+  click: (event: any) => void;
 }
 
 const Card = (props: ICard) => {
@@ -23,7 +23,7 @@ const Card = (props: ICard) => {
   React.useEffect(() => {
     const goSetCardData = async (name: string): Promise<void> => {
       const res = await axios.get(
-        `https://api.scryfall.com/cards/named?exact=${props.name}`
+        `https://api.scryfall.com/cards/named?exact=${name}`
       );
       setCardData(res.data);
     };
@@ -34,12 +34,6 @@ const Card = (props: ICard) => {
     debounced(props.name);
   }, [props.name]);
 
-  const handleClick = (event: any) => {
-    console.log("Card::handleClick:event:", event);
-    console.log("cardData:", cardData);
-    props.click();
-  };
-
   if (cardData) {
     return (
       <img
@@ -48,7 +42,7 @@ const Card = (props: ICard) => {
         style={{
           height: "20em"
         }}
-        onClick={handleClick}
+        onClick={props.click}
       />
     );
   }
