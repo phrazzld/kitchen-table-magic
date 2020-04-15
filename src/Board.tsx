@@ -116,6 +116,33 @@ const Board = () => {
             Draw
           </button>
         </div>
+        <div className="library-menu-action">
+          <button
+            onClick={() => {
+              console.log("Search");
+            }}
+          >
+            Search
+          </button>
+        </div>
+        <div className="library-menu-action">
+          <button
+            onClick={() => {
+              console.log("Shuffle");
+            }}
+          >
+            Shuffle
+          </button>
+        </div>
+        <div className="library-menu-action">
+          <button
+            onClick={() => {
+              console.log("Reveal Top Card");
+            }}
+          >
+            Reveal Top Card
+          </button>
+        </div>
       </div>
     );
   };
