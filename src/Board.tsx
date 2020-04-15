@@ -42,6 +42,7 @@ const Board = () => {
     activeCardMenu,
     setActiveCardMenu
   ] = React.useState<ActiveCardMenu | null>(null);
+  const [showLibraryMenu, setShowLibraryMenu] = React.useState<boolean>(false);
 
   const getCardsForZone = (zone: Zone): Array<CardData> => {
     return cards.filter((card: CardData) => card.zone === zone);
@@ -96,6 +97,28 @@ const Board = () => {
     cardId: string;
     coordinates: Coordinates;
   }
+
+  const handleLibraryClick = (event: any): void => {
+    console.log("handleLibraryClick::event:", event);
+    setShowLibraryMenu(showLibraryMenu => !showLibraryMenu);
+  };
+
+  const LibraryMenu = () => {
+    return (
+      <div className="library-menu">
+        <div className="library-menu-action">
+          <button
+            onClick={() => {
+              moveCardToZone(mockLibrary[0].id, "HAND");
+              setShowLibraryMenu(false);
+            }}
+          >
+            Draw
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const CardMenu = (props: ICardMenu) => {
     return (
@@ -154,9 +177,11 @@ const Board = () => {
             margin: "0.5em",
             padding: "0.5em"
           }}
+          onClick={event => handleLibraryClick(event)}
         >
           <h4>Library</h4>
           <h2>{mockLibrary.length}</h2>
+          {showLibraryMenu && <LibraryMenu />}
         </div>
         <div
           className="graveyard"
