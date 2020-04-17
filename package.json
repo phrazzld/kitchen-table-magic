@@ -14,10 +14,17 @@
     "@types/react-router-dom": "5.1.4",
     "@types/socket.io-client": "1.4.32",
     "axios": "^0.19.2",
+    "bcrypt": "4.0.1",
     "concurrently": "5.1.0",
+    "email-validator": "2.0.4",
     "express": "4.17.1",
+    "express-session": "1.17.0",
     "lodash": "^4.17.15",
+    "mongoose": "5.9.9",
+    "mongoose-unique-validator": "2.0.3",
     "nodemon": "2.0.3",
+    "passport": "0.4.1",
+    "passport-local": "1.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "5.1.2",
@@ -31,8 +38,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "nodemon src/server.js",
-    "dev": "concurrently --kill-others-on-fail \"yarn serve\" \"yarn start\""
+    "serve": "node src/server/server.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -48,5 +54,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "nodemonConfig": {
+    "restartable": "rs",
+    "ignore": [
+      "node_modules/**/node_modules"
+    ],
+    "delay": 500
+  },
+  "proxy":"http://localhost:8080"
 }

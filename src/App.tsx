@@ -1,23 +1,29 @@
 import React from "react";
 import Search from "./Search";
 import Board from "./Board";
-import CreateLink from './CreateLink';
-import io from 'socket.io-client';
+import Login from './Login';
+import Lobby from './Lobby';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
 
 function App() {
-  const socket = io('http://localhost:8080');
-  socket.on('chat', (message: String) => {
-    console.log(message);
-  });
-
-  socket.emit('chat', 'yoyoyo');
 
   return (
-    <>
-      <Search />
-      <Board />
-      <CreateLink />
-    </>
+    <Router>
+      <Switch>
+        <Route path = '/game/:id' >
+          <Lobby />
+        </Route>
+        <Route path = '/'>
+          <Login />
+          <Search />
+          <Board />
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 
