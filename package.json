@@ -55,12 +55,5 @@
       "last 1 safari version"
     ]
   },
-  "nodemonConfig": {
-    "restartable": "rs",
-    "ignore": [
-      "node_modules/**/node_modules"
-    ],
-    "delay": 500
-  },
   "proxy":"http://localhost:8080"
 }
