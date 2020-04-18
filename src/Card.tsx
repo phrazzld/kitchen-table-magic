@@ -2,19 +2,8 @@ import React from "react";
 import axios from "axios";
 import _ from "lodash";
 
-const getCardImage = (cardDataBlob: any) => {
-  if (cardDataBlob.card_faces) {
-    return cardDataBlob.card_faces[0].image_uris.png;
-  } else if (cardDataBlob.image_uris) {
-    return cardDataBlob.image_uris.png;
-  } else {
-    throw new Error("No card_faces or image_uris found for cardDataBlob");
-  }
-};
-
 interface ICard {
   name: string;
-  click: (event: any) => void;
 }
 
 const Card = (props: ICard) => {
@@ -23,9 +12,9 @@ const Card = (props: ICard) => {
   React.useEffect(() => {
     const goSetCardData = async (name: string): Promise<void> => {
       const res = await axios.get(
-        `https://api.scryfall.com/cards/named?exact=${name}`
+        `https://api.scryfall.com/cards/search?q=${props.name}`
       );
-      setCardData(res.data);
+      setCardData(res.data.data[0]);
     };
 
     const debounced = _.debounce(goSetCardData.bind(props.name), 1100, {
@@ -37,12 +26,11 @@ const Card = (props: ICard) => {
   if (cardData) {
     return (
       <img
-        src={getCardImage(cardData)}
+        src={cardData.image_uris.png}
         alt={`${cardData.name}: ${cardData.type_line}`}
         style={{
-          height: "20em"
+          height: "25em"
         }}
-        onClick={props.click}
       />
     );
   }

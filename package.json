@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^4.9.10",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -12,18 +11,34 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
+    "@types/react-router-dom": "5.1.4",
+    "@types/socket.io-client": "1.4.32",
     "axios": "^0.19.2",
+    "bcrypt": "4.0.1",
+    "concurrently": "5.1.0",
+    "email-validator": "2.0.4",
+    "express": "4.17.1",
+    "express-session": "1.17.0",
     "lodash": "^4.17.15",
+    "mongoose": "5.9.9",
+    "mongoose-unique-validator": "2.0.3",
+    "nodemon": "2.0.3",
+    "passport": "0.4.1",
+    "passport-local": "1.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-router-dom": "5.1.2",
     "react-scripts": "3.4.1",
+    "socket.io": "2.3.0",
+    "socket.io-client": "2.3.0",
     "typescript": "~3.7.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "node src/server/server.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -39,5 +54,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "nodemonConfig": {
+    "restartable": "rs",
+    "ignore": [
+      "node_modules/**/node_modules"
+    ],
+    "delay": 500
+  },
+  "proxy":"http://localhost:8080"
 }
