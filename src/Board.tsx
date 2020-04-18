@@ -43,6 +43,8 @@ const Board = () => {
     setActiveCardMenu
   ] = React.useState<ActiveCardMenu | null>(null);
   const [showLibraryMenu, setShowLibraryMenu] = React.useState<boolean>(false);
+  const [showOverlay, setShowOverlay] = React.useState<boolean>(false);
+  const [overlayCard, setOverlayCard] = React.useState<string>("");
 
   const getCardsForZone = (zone: Zone): Array<CardData> => {
     return cards.filter((card: CardData) => card.zone === zone);
@@ -66,12 +68,6 @@ const Board = () => {
   const mockHand: Array<CardData> = getCardsForZone("HAND");
 
   const handleClick = (event: any, card: CardData): void => {
-    console.log("Board::handleClick:card:", card);
-    console.log("event:", event);
-    console.log(
-      "event.currentTarget.getBoundingClientRect:",
-      event.currentTarget.getBoundingClientRect()
-    );
     // show actions for that card
     setActiveCardMenu({
       card: card,
@@ -95,6 +91,7 @@ const Board = () => {
 
   interface ICardMenu {
     cardId: string;
+    cardName: string;
     coordinates: Coordinates;
   }
 
@@ -147,6 +144,44 @@ const Board = () => {
     );
   };
 
+  interface IOverlay {
+    cardName: string;
+  }
+
+  const Overlay = (props: IOverlay) => {
+    return (
+      <div
+        style={{
+          position: "absolute",
+          height: "100%",
+          width: "100%",
+          backgroundColor: "gray"
+        }}
+      >
+        <h3
+          className="close-overlay"
+          onClick={() => setShowOverlay(false)}
+          style={{ textAlign: "right" }}
+        >
+          X
+        </h3>
+        <Card
+          name={props.cardName}
+          click={() => {
+            setOverlayCard("");
+            setShowOverlay(false);
+          }}
+          style={{ height: "30em" }}
+        />
+      </div>
+    );
+  };
+
+  const lookCloser = (cardName: string) => {
+    setOverlayCard(cardName);
+    setShowOverlay(true);
+  };
+
   const CardMenu = (props: ICardMenu) => {
     return (
       <div
@@ -173,15 +208,27 @@ const Board = () => {
             </div>
           );
         })}
+        <div>
+          <button
+            onClick={() => {
+              lookCloser(props.cardName);
+              setActiveCardMenu(null);
+            }}
+          >
+            Look Closer
+          </button>
+        </div>
       </div>
     );
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
+      {showOverlay && <Overlay cardName={overlayCard} />}
       {activeCardMenu && (
         <CardMenu
           cardId={activeCardMenu.card.id}
+          cardName={activeCardMenu.card.name}
           coordinates={activeCardMenu.coordinates}
         />
       )}
