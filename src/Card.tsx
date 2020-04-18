@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import styled from "styled-components";
 import _ from "lodash";
 
 const getCardImage = (cardDataBlob: any) => {
@@ -12,9 +13,14 @@ const getCardImage = (cardDataBlob: any) => {
   }
 };
 
+const CardImage = styled.img`
+  height: 20em;
+`;
+
 interface ICard {
   name: string;
   click: (event: any) => void;
+  style?: any;
 }
 
 const Card = (props: ICard) => {
@@ -36,12 +42,10 @@ const Card = (props: ICard) => {
 
   if (cardData) {
     return (
-      <img
+      <CardImage
         src={getCardImage(cardData)}
         alt={`${cardData.name}: ${cardData.type_line}`}
-        style={{
-          height: "20em"
-        }}
+        style={props.style}
         onClick={props.click}
       />
     );
