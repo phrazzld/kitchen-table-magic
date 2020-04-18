@@ -9,10 +9,6 @@ import {
 } from "react-router-dom";
 
 function App() {
-<<<<<<< HEAD
-  return <Board />;
-=======
-
   return (
     <Router>
       <Switch>
@@ -27,7 +23,6 @@ function App() {
       </Switch>
     </Router>
   );
->>>>>>> 041d97a71c8d483cff21d508fd4eb66ee2edde8a
 }
 
 export default App;
