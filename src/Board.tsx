@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "@material-ui/core/Button";
 import Card from "./Card";
 
 type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
@@ -25,6 +26,24 @@ type Coordinates = {
 type ActiveCardMenu = {
   card: CardData;
   coordinates: Coordinates;
+};
+
+interface ICardActionMenuButton {
+  text: string;
+  onClick: () => void;
+}
+
+const CardActionMenuButton = (props: ICardActionMenuButton) => {
+  return (
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={props.onClick}
+      style={{ margin: "0.3em" }}
+    >
+      {props.text}
+    </Button>
+  );
 };
 
 const Board = () => {
@@ -68,12 +87,18 @@ const Board = () => {
   const mockHand: Array<CardData> = getCardsForZone("HAND");
 
   const handleClick = (event: any, card: CardData): void => {
+    const docElem = document.documentElement;
+    const docBod = document.body;
+    const scrollTop = (docElem && docElem.scrollTop) || docBod.scrollTop;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = bounds.x;
+    const y = bounds.y;
     // show actions for that card
     setActiveCardMenu({
       card: card,
       coordinates: {
-        top: event.currentTarget.getBoundingClientRect().y,
-        left: event.currentTarget.getBoundingClientRect().x
+        top: y + scrollTop,
+        left: x
       }
     });
   };
@@ -104,41 +129,31 @@ const Board = () => {
     return (
       <div className="library-menu">
         <div className="library-menu-action">
-          <button
+          <CardActionMenuButton
+            text="Draw"
             onClick={() => {
               moveCardToZone(mockLibrary[0].id, "HAND");
               setShowLibraryMenu(false);
             }}
-          >
-            Draw
-          </button>
+          />
         </div>
         <div className="library-menu-action">
-          <button
-            onClick={() => {
-              console.log("Search");
-            }}
-          >
-            Search
-          </button>
+          <CardActionMenuButton
+            text="Search"
+            onClick={() => console.log("Search")}
+          />
         </div>
         <div className="library-menu-action">
-          <button
-            onClick={() => {
-              console.log("Shuffle");
-            }}
-          >
-            Shuffle
-          </button>
+          <CardActionMenuButton
+            text="Shuffle"
+            onClick={() => console.log("Shuffle")}
+          />
         </div>
         <div className="library-menu-action">
-          <button
-            onClick={() => {
-              console.log("Reveal Top Card");
-            }}
-          >
-            Reveal Top Card
-          </button>
+          <CardActionMenuButton
+            text="Reveal Top Card"
+            onClick={() => console.log("Reveal Top Card")}
+          />
         </div>
       </div>
     );
@@ -197,26 +212,27 @@ const Board = () => {
         {getZones().map((zone: Zone) => {
           return (
             <div>
-              <button
+              <CardActionMenuButton
+                text={`Send to ${zone.toString()}`}
                 onClick={() => {
                   moveCardToZone(props.cardId, zone);
                   setActiveCardMenu(null);
                 }}
-              >
-                Send to {zone.toString()}
-              </button>
+              />
             </div>
           );
         })}
         <div>
-          <button
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => {
               lookCloser(props.cardName);
               setActiveCardMenu(null);
             }}
           >
             Look Closer
-          </button>
+          </Button>
         </div>
       </div>
     );
