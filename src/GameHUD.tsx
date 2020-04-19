@@ -1,9 +1,9 @@
 import React from "react";
 import "./App.css";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 
 interface IGameHUD {
-  users: string[]
+  users: string[];
 }
 
 const GameHUD = (props: IGameHUD) => {
@@ -11,9 +11,9 @@ const GameHUD = (props: IGameHUD) => {
   return (
     <>
       <p>Game Lobby ID: {id}</p>
-      {
-        props.users.map((user) => <p key={user}>{user}</p>)
-      }
+      {props.users.map((user) => (
+        <p key={user}>{user}</p>
+      ))}
     </>
   );
 };
