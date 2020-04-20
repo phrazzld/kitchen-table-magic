@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
+import OutsideClickHandler from "react-outside-click-handler";
 import Card from "./Card";
 
 type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
@@ -242,11 +243,19 @@ const Board = () => {
     <div style={{ display: "flex", flexDirection: "column" }}>
       {showOverlay && <Overlay cardName={overlayCard} />}
       {activeCardMenu && (
-        <CardMenu
-          cardId={activeCardMenu.card.id}
-          cardName={activeCardMenu.card.name}
-          coordinates={activeCardMenu.coordinates}
-        />
+        <OutsideClickHandler
+          onOutsideClick={() => {
+            console.log("outside click handler triggered");
+            setActiveCardMenu(null);
+            setShowLibraryMenu(false);
+          }}
+        >
+          <CardMenu
+            cardId={activeCardMenu.card.id}
+            cardName={activeCardMenu.card.name}
+            coordinates={activeCardMenu.coordinates}
+          />
+        </OutsideClickHandler>
       )}
       <div className="battlefield">
         <h4>Battlefield</h4>
@@ -271,7 +280,15 @@ const Board = () => {
         >
           <h4>Library</h4>
           <h2>{mockLibrary.length}</h2>
-          {showLibraryMenu && <LibraryMenu />}
+          {showLibraryMenu && (
+            <OutsideClickHandler
+              onOutsideClick={() => {
+                setShowLibraryMenu(false);
+              }}
+            >
+              <LibraryMenu />
+            </OutsideClickHandler>
+          )}
         </div>
         <div
           className="graveyard"
