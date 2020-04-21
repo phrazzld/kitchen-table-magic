@@ -15,14 +15,14 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     index: { unique: true },
   },
-  password: String,
+  password: { type: String, required: true },
   decks: [
     {
       name: String,
       cards: [String],
     },
   ],
-  friends: [String],
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 UserSchema.plugin(uniqueValidator);
