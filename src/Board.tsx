@@ -1,23 +1,8 @@
-import React from "react";
 import Button from "@material-ui/core/Button";
+import React from "react";
 import OutsideClickHandler from "react-outside-click-handler";
-import Card from "./Card";
-
-type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
-
-type CardData = {
-  id: string;
-  name: string;
-  zone: Zone;
-};
-
-const generateId = (): string => {
-  return "_".concat(
-    Math.random()
-      .toString(36)
-      .substr(2, 9)
-  );
-};
+import Card, { Zone, CardData } from "./Card";
+import Deck from "./Deck";
 
 type Coordinates = {
   top: number;
@@ -47,17 +32,12 @@ const CardActionMenuButton = (props: ICardActionMenuButton) => {
   );
 };
 
-const Board = () => {
-  const [cards, setCards] = React.useState<Array<CardData>>([
-    { id: generateId(), name: "Phage the Untouchable", zone: "BATTLEFIELD" },
-    { id: generateId(), name: "Dark Ritual", zone: "HAND" },
-    { id: generateId(), name: "Underworld Dreams", zone: "BATTLEFIELD" },
-    { id: generateId(), name: "Swamp", zone: "GRAVEYARD" },
-    { id: generateId(), name: "Yawgmoth, Thran Physician", zone: "EXILE" },
-    { id: generateId(), name: "Mox Opal", zone: "LIBRARY" },
-    { id: generateId(), name: "Swamp", zone: "LIBRARY" },
-    { id: generateId(), name: "Swamp", zone: "LIBRARY" }
-  ]);
+interface IBoard {
+  deck: Deck;
+}
+
+const Board = (props: IBoard) => {
+  const [cards, setCards] = React.useState<Deck>(props.deck);
   const [
     activeCardMenu,
     setActiveCardMenu
@@ -70,15 +50,19 @@ const Board = () => {
     return cards.filter((card: CardData) => card.zone === zone);
   };
 
-  const moveCardToZone = (id: string, zone: Zone): void => {
+  const moveCardsToZone = (cardIds: Array<string>, zone: Zone): void => {
     const updatedCards = cards.map((card: CardData) => {
-      if (card.id === id) {
+      if (cardIds.indexOf(card.id) > -1) {
         return { ...card, zone: zone };
       } else {
         return card;
       }
     });
     setCards(updatedCards);
+  };
+
+  const moveCardToZone = (cardId: string, zone: Zone): void => {
+    moveCardsToZone([cardId], zone);
   };
 
   const mockBattlefield: Array<CardData> = getCardsForZone("BATTLEFIELD");
@@ -121,9 +105,18 @@ const Board = () => {
     coordinates: Coordinates;
   }
 
-  const handleLibraryClick = (event: any): void => {
-    console.log("handleLibraryClick::event:", event);
+  const handleLibraryClick = (): void => {
     setShowLibraryMenu(showLibraryMenu => !showLibraryMenu);
+  };
+
+  const draw = (n: number): void => {
+    let cardIds: Array<string> = [];
+    for (let i = 0; i < n; i++) {
+      if (mockLibrary[i]) {
+        cardIds.push(mockLibrary[i].id);
+      }
+    }
+    moveCardsToZone(cardIds, "HAND");
   };
 
   const LibraryMenu = () => {
@@ -133,7 +126,16 @@ const Board = () => {
           <CardActionMenuButton
             text="Draw"
             onClick={() => {
-              moveCardToZone(mockLibrary[0].id, "HAND");
+              draw(1);
+              setShowLibraryMenu(false);
+            }}
+          />
+        </div>
+        <div className="library-menu-action">
+          <CardActionMenuButton
+            text="Draw Seven"
+            onClick={() => {
+              draw(7);
               setShowLibraryMenu(false);
             }}
           />
@@ -212,7 +214,7 @@ const Board = () => {
       >
         {getZones().map((zone: Zone) => {
           return (
-            <div>
+            <div key={`${props.cardId}_to_${zone.toString()}`}>
               <CardActionMenuButton
                 text={`Send to ${zone.toString()}`}
                 onClick={() => {
@@ -276,7 +278,7 @@ const Board = () => {
             margin: "0.5em",
             padding: "0.5em"
           }}
-          onClick={event => handleLibraryClick(event)}
+          onClick={handleLibraryClick}
         >
           <h4>Library</h4>
           <h2>{mockLibrary.length}</h2>
