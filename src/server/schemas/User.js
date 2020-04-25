@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
   decks: [
     {
       name: String,
-      cards: [String],
+      cards: [{ type: mongoose.Schema.Types.ObjectId }],
     },
   ],
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

@@ -7,14 +7,14 @@ interface IGameHUD {
 }
 
 const GameHUD = (props: IGameHUD) => {
-  const { id } = useParams();
+  const { lobbyId } = useParams();
   return (
-    <>
-      <p>Game Lobby ID: {id}</p>
+    <div>
+      <p>Game Lobby ID: {lobbyId}</p>
       {props.users.map((user) => (
         <p key={user}>{user}</p>
       ))}
-    </>
+    </div>
   );
 };
 

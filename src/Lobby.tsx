@@ -1,28 +1,25 @@
 import React from "react";
 import "./App.css";
 import GameHUD from "./GameHUD";
-import { checkLogin } from "./Login";
-import { useParams } from "react-router-dom";
+import { getCurrentUser } from "./Login";
+import { useParams, Redirect } from "react-router-dom";
 import io from "socket.io-client";
 
 interface ILobby {}
 
 const Lobby = (props: ILobby) => {
-  const [loggedIn, setLoggedIn] = React.useState<boolean>(false);
+  const [loggedIn, setLoggedIn] = React.useState<boolean>(true);
   const [users, setUsers] = React.useState<string[]>([]);
-  const [email, setEmail] = React.useState<string>("");
-  const [socket, setSocket] = React.useState(() => io("/"));
-  const [update, setUpdate] = React.useState<string>("");
-  const { id } = useParams();
+  const [socket] = React.useState(() => io("/"));
+  const { lobbyId } = useParams();
 
   React.useEffect(() => {
     const asyncOps = async () => {
-      const loginStatus = await checkLogin();
-      if (loginStatus.logged_in) {
-        setLoggedIn(loginStatus.logged_in);
-        socket.emit("join", id, loginStatus.email);
-        setUsers((userArray) => userArray.concat([loginStatus.email]));
-        setEmail(loginStatus.email);
+      const currentUser = await getCurrentUser();
+      setLoggedIn(currentUser.loggedIn);
+      if (currentUser.loggedIn) {
+        socket.emit("join", lobbyId, currentUser.email);
+        setUsers((users) => users.concat(currentUser.email));
       }
     };
     asyncOps();
@@ -30,47 +27,31 @@ const Lobby = (props: ILobby) => {
 
   React.useEffect(() => {
     if (loggedIn) {
-      socket.emit("ping_room", id);
+      socket.emit("pingRoom", lobbyId);
 
-      socket.on("user_disconnected", (user: string) => {
+      socket.on("userDisconnected", (userEmail: string) => {
         setUsers((users) => {
-          const index = users.indexOf(user.toString());
-          if (index != -1) {
+          const index = users.indexOf(userEmail.toString());
+          if (index !== -1) {
             users.splice(index, 1);
           }
           return users;
         });
       });
 
-      socket.on("user_connected", (user: string) => {
-        setUsers((userArray) => userArray.concat([user]));
+      socket.on("userConnected", (userEmail: string) => {
+        setUsers((users) => users.concat(userEmail));
       });
 
-      socket.on("pong_user", (userId: string) => {
+      socket.on("pongUser", (userId: string) => {
         socket.emit("pong_user", userId);
-      });
-
-      socket.on("update", (update: string) => {
-        setUpdate("testing");
       });
     }
   }, [loggedIn]);
 
-  const handleClick = (): void => {
-    socket.emit("update", "yoyoyo");
-  };
-
   return (
-    <div className="App">
-      {loggedIn ? (
-        <>
-          <GameHUD users={users} />
-          <button onClick={handleClick}>Test</button>
-          {update}
-        </>
-      ) : (
-        <p>login required</p>
-      )}
+    <div className="lobby">
+      {loggedIn ? <GameHUD users={users} /> : <Redirect to="/" />}
     </div>
   );
 };

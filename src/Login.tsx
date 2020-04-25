@@ -1,35 +1,37 @@
 import React from "react";
 import "./App.css";
-import CreateLobbyLink from "./CreateLobbyLink";
+import createLobbyLink from "./createLobbyLink";
+import { Link } from "react-router-dom";
 
 interface ILogin {}
 
-export const checkLogin = async () => {
-  console.log("logging in");
+export const getCurrentUser = async () => {
   const response = await fetch("/loggedIn");
   const json = await response.json();
+  console.log(json);
   return json;
 };
 
 const Login = (props: ILogin) => {
-  const [email, setEmail] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
+  const [emailInput, setEmailInput] = React.useState<string>("");
+  const [passwordInput, setPasswordInput] = React.useState<string>("");
   const [statusMessage, setStatusMessage] = React.useState<string>("");
   const [loginStatus, setLoginStatus] = React.useState<boolean>(false);
-  const [loginEmail, setLoginEmail] = React.useState<string>("");
 
   const handleEmailChange = (event: any): void => {
-    setEmail(event.target.value);
+    setEmailInput(event.target.value);
   };
 
   const handlePasswordChange = (event: any): void => {
-    setPassword(event.target.value);
+    setPasswordInput(event.target.value);
   };
 
   const handleSubmit = async () => {
+    setStatusMessage("");
+
     const response = await fetch("/login", {
       method: "post",
-      body: JSON.stringify({ username: email, password }),
+      body: JSON.stringify({ username: emailInput, password: passwordInput }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -38,29 +40,32 @@ const Login = (props: ILogin) => {
       setLoginStatus(false);
       setStatusMessage("Invalid email/password combination.");
     } else {
-      setLoginEmail(email);
       setLoginStatus(true);
     }
   };
 
   const handleRegister = async () => {
+    setStatusMessage("");
+
     const response = await fetch("/register", {
       method: "post",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: emailInput, password: passwordInput }),
       headers: {
         "Content-Type": "application/json",
       },
     });
-    console.log(response.status);
-    if (response.status === 401) {
-      setStatusMessage("Email already in use.");
-    } else if (response.status === 200) {
-      setLoginEmail(email);
-      setLoginStatus(true);
-    } else if (response.status === 400) {
-      setStatusMessage("Invalid email address.");
-    } else {
-      setStatusMessage("Internal server error.");
+    switch (response.status) {
+      case 401:
+        setStatusMessage("Email already in use.");
+        break;
+      case 200:
+        setLoginStatus(true);
+        break;
+      case 400:
+        setStatusMessage("Invalid email address.");
+        break;
+      default:
+        setStatusMessage("Internal server error.");
     }
   };
 
@@ -71,32 +76,29 @@ const Login = (props: ILogin) => {
   };
 
   React.useEffect(() => {
-    const temp = async () => {
-      const loggedIn = await checkLogin();
-      setLoginStatus(loggedIn.logged_in);
-      setLoginEmail(loggedIn.email);
+    const asyncLogin = async () => {
+      const loggedIn = await getCurrentUser();
+      setLoginStatus(loggedIn.loggedIn);
+      setEmailInput(loggedIn.email);
     };
-    temp();
+    asyncLogin();
   }, []);
-
-  React.useEffect(() => {
-    setStatusMessage("");
-  }, [email, password]);
 
   return (
     <>
       {loginStatus ? (
-        <>
-          <p>Logged in as {loginEmail}</p>
-          <a href={CreateLobbyLink()}>Game Lobby</a>
-        </>
+        <div className="authenticated-banner">
+          <p>Logged in as {emailInput}</p>
+          <Link to="/decks"> My Decks </Link> <br />
+          <a href={createLobbyLink()}>Game Lobby</a>
+        </div>
       ) : (
-        <>
+        <div className="loginForm">
           Log In: <br />
           <input
             type="text"
             name="email"
-            value={email}
+            value={emailInput}
             onChange={handleEmailChange}
             placeholder="email"
             onKeyDown={handleKeyDown}
@@ -104,7 +106,7 @@ const Login = (props: ILogin) => {
           <input
             type="password"
             name="password"
-            value={password}
+            value={passwordInput}
             onChange={handlePasswordChange}
             placeholder="password"
             onKeyDown={handleKeyDown}
@@ -116,7 +118,7 @@ const Login = (props: ILogin) => {
             Register
           </button>
           <p>{statusMessage}</p>
-        </>
+        </div>
       )}
     </>
   );
