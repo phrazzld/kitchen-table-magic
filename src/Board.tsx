@@ -2,7 +2,7 @@ import Button from "@material-ui/core/Button";
 import React from "react";
 import OutsideClickHandler from "react-outside-click-handler";
 import Card, { Zone, CardData } from "./Card";
-import Deck from "./Deck";
+import Deck, { shuffleDeck } from "./Deck";
 
 type Coordinates = {
   top: number;
@@ -65,12 +65,6 @@ const Board = (props: IBoard) => {
     moveCardsToZone([cardId], zone);
   };
 
-  const mockBattlefield: Array<CardData> = getCardsForZone("BATTLEFIELD");
-  const mockLibrary: Array<CardData> = getCardsForZone("LIBRARY");
-  const mockGraveyard: Array<CardData> = getCardsForZone("GRAVEYARD");
-  const mockExile: Array<CardData> = getCardsForZone("EXILE");
-  const mockHand: Array<CardData> = getCardsForZone("HAND");
-
   const handleClick = (event: any, card: CardData): void => {
     const docElem = document.documentElement;
     const docBod = document.body;
@@ -112,11 +106,30 @@ const Board = (props: IBoard) => {
   const draw = (n: number): void => {
     let cardIds: Array<string> = [];
     for (let i = 0; i < n; i++) {
-      if (mockLibrary[i]) {
-        cardIds.push(mockLibrary[i].id);
+      if (getCardsForZone("LIBRARY")[i]) {
+        cardIds.push(getCardsForZone("LIBRARY")[i].id);
+      } else {
+        window.alert("You drew too many cards. You lose!");
       }
     }
     moveCardsToZone(cardIds, "HAND");
+  };
+
+  const handleShuffleClick = (): void => {
+    const shuffledLibrary: Array<CardData> = shuffleDeck(
+      getCardsForZone("LIBRARY")
+    );
+    let i = -1;
+    setCards((cards: Array<CardData>) => {
+      return cards.map((card: CardData) => {
+        if (card.zone === "LIBRARY") {
+          i++;
+          return shuffledLibrary[i];
+        } else {
+          return card;
+        }
+      });
+    });
   };
 
   const LibraryMenu = () => {
@@ -147,10 +160,7 @@ const Board = (props: IBoard) => {
           />
         </div>
         <div className="library-menu-action">
-          <CardActionMenuButton
-            text="Shuffle"
-            onClick={() => console.log("Shuffle")}
-          />
+          <CardActionMenuButton text="Shuffle" onClick={handleShuffleClick} />
         </div>
         <div className="library-menu-action">
           <CardActionMenuButton
@@ -261,13 +271,15 @@ const Board = (props: IBoard) => {
       )}
       <div className="battlefield">
         <h4>Battlefield</h4>
-        {mockBattlefield.map(card => (
-          <Card
-            key={card.id}
-            name={card.name}
-            click={event => handleClick(event, card)}
-          />
-        ))}
+        {cards
+          .filter((card: CardData) => card.zone === "BATTLEFIELD")
+          .map((card: CardData) => (
+            <Card
+              key={card.id}
+              name={card.name}
+              click={event => handleClick(event, card)}
+            />
+          ))}
       </div>
       <div className="piles" style={{ display: "flex", flexDirection: "row" }}>
         <div
@@ -281,7 +293,7 @@ const Board = (props: IBoard) => {
           onClick={handleLibraryClick}
         >
           <h4>Library</h4>
-          <h2>{mockLibrary.length}</h2>
+          <h2>{getCardsForZone("LIBRARY").length}</h2>
           {showLibraryMenu && (
             <OutsideClickHandler
               onOutsideClick={() => {
@@ -302,10 +314,12 @@ const Board = (props: IBoard) => {
           }}
         >
           <h4>Graveyard</h4>
-          {mockGraveyard[0] && (
+          {getCardsForZone("GRAVEYARD")[0] && (
             <Card
-              name={mockGraveyard[0].name}
-              click={event => handleClick(event, mockGraveyard[0])}
+              name={getCardsForZone("GRAVEYARD")[0].name}
+              click={event =>
+                handleClick(event, getCardsForZone("GRAVEYARD")[0])
+              }
             />
           )}
         </div>
@@ -319,25 +333,23 @@ const Board = (props: IBoard) => {
           }}
         >
           <h4>Exile</h4>
-          {mockExile[0] && (
+          {getCardsForZone("EXILE")[0] && (
             <Card
-              name={mockExile[0].name}
-              click={event => handleClick(event, mockExile[0])}
+              name={getCardsForZone("EXILE")[0].name}
+              click={event => handleClick(event, getCardsForZone("EXILE")[0])}
             />
           )}
         </div>
       </div>
       <div className="hand">
-        <div className="library">
-          <h4>Hand</h4>
-          {mockHand.map(card => (
-            <Card
-              key={card.id}
-              name={card.name}
-              click={event => handleClick(event, card)}
-            />
-          ))}
-        </div>
+        <h4>Hand</h4>
+        {getCardsForZone("HAND").map(card => (
+          <Card
+            key={card.id}
+            name={card.name}
+            click={event => handleClick(event, card)}
+          />
+        ))}
       </div>
     </div>
   );
