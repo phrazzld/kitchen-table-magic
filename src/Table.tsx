@@ -11,7 +11,7 @@ const Table = (props: ITable) => {
   return (
     <React.Fragment>
       {props.decks &&
-        props.decks.map((deck: any) => (
+        props.decks.map((deck: Deck) => (
           <Board key={generateId()} deck={deck} />
         ))}
     </React.Fragment>

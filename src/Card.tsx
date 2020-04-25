@@ -1,7 +1,7 @@
-import React from "react";
 import axios from "axios";
-import styled from "styled-components";
 import _ from "lodash";
+import React from "react";
+import styled from "styled-components";
 import { generateId } from "./utils";
 
 export type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
@@ -20,7 +20,7 @@ export const newCardData = (name: string): CardData => {
   };
 };
 
-const getCardImage = (cardDataBlob: any) => {
+const getCardImage = (cardDataBlob: any): string => {
   if (cardDataBlob.card_faces) {
     return cardDataBlob.card_faces[0].image_uris.png;
   } else if (cardDataBlob.image_uris) {
@@ -51,7 +51,6 @@ const Card = (props: ICard) => {
       );
       setCardData(res.data);
     };
-
     const debounced = _.debounce(goSetCardData.bind(props.name), 1100, {
       leading: true
     });
