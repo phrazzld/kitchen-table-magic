@@ -2,6 +2,23 @@ import React from "react";
 import axios from "axios";
 import styled from "styled-components";
 import _ from "lodash";
+import { generateId } from "./utils";
+
+export type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
+
+export type CardData = {
+  id: string;
+  name: string;
+  zone: Zone;
+};
+
+export const newCardData = (name: string): CardData => {
+  return {
+    id: generateId(),
+    name: name,
+    zone: "LIBRARY"
+  };
+};
 
 const getCardImage = (cardDataBlob: any) => {
   if (cardDataBlob.card_faces) {
@@ -14,7 +31,8 @@ const getCardImage = (cardDataBlob: any) => {
 };
 
 const CardImage = styled.img`
-  height: 20em;
+  height: 20rem;
+  margin: 0.5rem;
 `;
 
 interface ICard {
