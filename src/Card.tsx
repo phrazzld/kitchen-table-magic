@@ -1,8 +1,26 @@
-import React from "react";
 import axios from "axios";
 import _ from "lodash";
+import React from "react";
+import styled from "styled-components";
+import { generateId } from "./utils";
 
-const getCardImage = (cardDataBlob: any) => {
+export type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
+
+export type CardData = {
+  id: string;
+  name: string;
+  zone: Zone;
+};
+
+export const newCardData = (name: string): CardData => {
+  return {
+    id: generateId(),
+    name: name,
+    zone: "LIBRARY"
+  };
+};
+
+const getCardImage = (cardDataBlob: any): string => {
   if (cardDataBlob.card_faces) {
     return cardDataBlob.card_faces[0].image_uris.png;
   } else if (cardDataBlob.image_uris) {
@@ -12,9 +30,15 @@ const getCardImage = (cardDataBlob: any) => {
   }
 };
 
+const CardImage = styled.img`
+  height: 20rem;
+  margin: 0.5rem;
+`;
+
 interface ICard {
   name: string;
   click: (event: any) => void;
+  style?: any;
 }
 
 const Card = (props: ICard) => {
@@ -27,7 +51,6 @@ const Card = (props: ICard) => {
       );
       setCardData(res.data);
     };
-
     const debounced = _.debounce(goSetCardData.bind(props.name), 1100, {
       leading: true
     });
@@ -36,12 +59,10 @@ const Card = (props: ICard) => {
 
   if (cardData) {
     return (
-      <img
+      <CardImage
         src={getCardImage(cardData)}
         alt={`${cardData.name}: ${cardData.type_line}`}
-        style={{
-          height: "20em"
-        }}
+        style={props.style}
         onClick={props.click}
       />
     );
