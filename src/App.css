@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.deckEditor {
+  float:left;
+}
+
+.deckEditorList {
+  width: 500px;
+  float:right;
+}
