@@ -76,7 +76,6 @@ const fetchDecks = (room) => {
 
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
   if (findClient(socket.id) === -1) {
     addClient(socket.id);
   }
@@ -97,16 +96,6 @@ io.on("connection", (socket) => {
     setDeck(socket.id, deck);
     const decks = fetchDecks(room);
     socket.to(room).emit("refreshDecks", decks);
-  });
-
-  socket.on("pingRoom", (room) => {
-    console.log(`${socket.email} pinging`);
-    socket.to(room).emit("pongUser", socket.id);
-  });
-
-  socket.on("pongUser", (userId) => {
-    console.log(`${socket.email} ponging`);
-    io.to(userId).emit("userConnected", socket.email);
   });
 
   socket.on("disconnect", () => {

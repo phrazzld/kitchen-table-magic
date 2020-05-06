@@ -46,7 +46,6 @@ userRouter.route("/register").post(async (req, res) => {
 });
 
 userRouter.route("/loggedIn").get((req, res) => {
-  console.log("login attempt");
   if (req.user) {
     return res.json({ loggedIn: true, email: req.user.email });
   }

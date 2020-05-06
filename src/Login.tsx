@@ -10,6 +10,13 @@ interface ILogin {
   setUserEmail: React.Dispatch<SetStateAction<string>>
 }
 
+export const getCurrentUser = async () => {
+  const response = await fetch("/loggedIn");
+  const json = await response.json();
+  console.log(json);
+  return json;
+};
+
 const Login = (props: ILogin) => {
   const [emailInput, setEmailInput] = React.useState<string>("");
   const [passwordInput, setPasswordInput] = React.useState<string>("");

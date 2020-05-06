@@ -16,7 +16,7 @@ interface IEnemyDeckAssigned {
   deck: Deck
 }
 
-const Lobby = (props: ILobby) => {giut 
+const Lobby = (props: ILobby) => {
   const [users, setUsers] = React.useState<string[]>([]);
   const [socket] = React.useState(() => io("/"));
   const { lobbyId } = useParams();
