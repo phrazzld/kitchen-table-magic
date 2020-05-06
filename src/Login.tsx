@@ -1,6 +1,6 @@
 import React, {SetStateAction} from "react";
 import "./App.css";
-import createLobbyLink from "./createLobbyLink";
+import { createLobbyLink } from "./utils";
 import { Link } from "react-router-dom";
 
 interface ILogin {
@@ -9,12 +9,6 @@ interface ILogin {
   setLoggedIn: React.Dispatch<SetStateAction<boolean>>,
   setUserEmail: React.Dispatch<SetStateAction<string>>
 }
-
-export const getCurrentUser = async () => {
-  const response = await fetch("/loggedIn");
-  const json = await response.json();
-  return json;
-};
 
 const Login = (props: ILogin) => {
   const [emailInput, setEmailInput] = React.useState<string>("");
@@ -36,8 +30,8 @@ const Login = (props: ILogin) => {
       method: "post",
       body: JSON.stringify({ username: emailInput, password: passwordInput }),
       headers: {
-        "Content-Type": "application/json",
-      },
+        "Content-Type": "application/json"
+      }
     });
     if (response.redirected) {
       props.setLoggedIn(false)
@@ -54,8 +48,8 @@ const Login = (props: ILogin) => {
       method: "post",
       body: JSON.stringify({ email: emailInput, password: passwordInput }),
       headers: {
-        "Content-Type": "application/json",
-      },
+        "Content-Type": "application/json"
+      }
     });
     switch (response.status) {
       case 401:
