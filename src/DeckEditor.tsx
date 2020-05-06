@@ -1,11 +1,12 @@
 import React from "react";
 import "./App.css";
-import { getCurrentUser } from "./Login";
 import { Redirect, Link } from "react-router-dom";
 
-interface IDeckEditor {}
+interface IDeckEditor {
+  loggedIn: boolean
+}
 
-interface IDeckData {
+export interface IRawDeckData {
   cards: string[];
   _id: string;
   name: string;
@@ -18,21 +19,20 @@ export const getDecks = async () => {
 };
 
 const DeckEditor = (props: IDeckEditor) => {
-  const [loginStatus, setLoginStatus] = React.useState<boolean>(true);
   const [deckInput, setDeckInput] = React.useState<string>("");
   const [deckNameInput, setDeckNameInput] = React.useState<string>("");
   const [deckStatusMessage, setDeckStatusMessage] = React.useState<string>("");
-  const [allDecks, setAllDecks] = React.useState<IDeckData[]>([]);
+  const [allDecks, setAllDecks] = React.useState<IRawDeckData[]>([]);
 
-  React.useEffect(() => {
-    const temp = async () => {
-      const loggedIn = await getCurrentUser();
-      setLoginStatus(loggedIn.loggedIn);
-
-      setAllDecks(await getDecks());
-    };
-    temp();
-  }, []);
+  React.useEffect(()=>{
+    const awaitDecks = async () => {
+      const decks = await getDecks();
+      if(decks) {
+        setAllDecks(decks);
+      }
+    }
+    awaitDecks();
+  }, [])
 
   const handleDeckEditorChange = (event: any): void => {
     setDeckInput(event.target.value);
@@ -54,7 +54,6 @@ const DeckEditor = (props: IDeckEditor) => {
     });
 
     setDeckStatusMessage("Saving Deck...");
-    console.log(deckNameInput);
     const response = await fetch("/api/decks", {
       method: "post",
       body: JSON.stringify({ cards: formattedDeck, name: deckNameInput }),
@@ -67,18 +66,19 @@ const DeckEditor = (props: IDeckEditor) => {
         setDeckStatusMessage("Deck Successfully Added");
         setAllDecks(await getDecks());
         break;
-      case 500:
-        setDeckStatusMessage("Error fetching cards.");
-        break;
       case 400:
         setDeckStatusMessage("You already have a deck with this name.");
         break;
+      default:
+        setDeckStatusMessage("Error fetching cards.");
+        break;
+
     }
   };
 
   return (
-    <div>
-      {loginStatus ? (
+    <>
+      {props.loggedIn ? (
         <div>
           <div className="deckEditor">
             <div>
@@ -114,7 +114,7 @@ const DeckEditor = (props: IDeckEditor) => {
       ) : (
         <Redirect to="/" />
       )}
-    </div>
+    </>
   );
 };
 

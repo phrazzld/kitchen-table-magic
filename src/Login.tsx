@@ -1,14 +1,18 @@
-import React from "react";
+import React, {SetStateAction} from "react";
 import "./App.css";
 import createLobbyLink from "./createLobbyLink";
 import { Link } from "react-router-dom";
 
-interface ILogin {}
+interface ILogin {
+  loggedIn: boolean,
+  userEmail: string,
+  setLoggedIn: React.Dispatch<SetStateAction<boolean>>,
+  setUserEmail: React.Dispatch<SetStateAction<string>>
+}
 
 export const getCurrentUser = async () => {
   const response = await fetch("/loggedIn");
   const json = await response.json();
-  console.log(json);
   return json;
 };
 
@@ -16,7 +20,6 @@ const Login = (props: ILogin) => {
   const [emailInput, setEmailInput] = React.useState<string>("");
   const [passwordInput, setPasswordInput] = React.useState<string>("");
   const [statusMessage, setStatusMessage] = React.useState<string>("");
-  const [loginStatus, setLoginStatus] = React.useState<boolean>(false);
 
   const handleEmailChange = (event: any): void => {
     setEmailInput(event.target.value);
@@ -37,10 +40,10 @@ const Login = (props: ILogin) => {
       },
     });
     if (response.redirected) {
-      setLoginStatus(false);
+      props.setLoggedIn(false)
       setStatusMessage("Invalid email/password combination.");
     } else {
-      setLoginStatus(true);
+      props.setLoggedIn(true)
     }
   };
 
@@ -59,7 +62,7 @@ const Login = (props: ILogin) => {
         setStatusMessage("Email already in use.");
         break;
       case 200:
-        setLoginStatus(true);
+        props.setLoggedIn(true)
         break;
       case 400:
         setStatusMessage("Invalid email address.");
@@ -75,20 +78,11 @@ const Login = (props: ILogin) => {
     }
   };
 
-  React.useEffect(() => {
-    const asyncLogin = async () => {
-      const loggedIn = await getCurrentUser();
-      setLoginStatus(loggedIn.loggedIn);
-      setEmailInput(loggedIn.email);
-    };
-    asyncLogin();
-  }, []);
-
   return (
     <>
-      {loginStatus ? (
+      {props.loggedIn ? (
         <div className="authenticated-banner">
-          <p>Logged in as {emailInput}</p>
+          <p>Logged in as {props.userEmail}</p>
           <Link to="/decks"> My Decks </Link> <br />
           <a href={createLobbyLink()}>Game Lobby</a>
         </div>

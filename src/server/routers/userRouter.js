@@ -56,6 +56,7 @@ userRouter.route("/loggedIn").get((req, res) => {
 userRouter
   .route("/api/decks")
   .get(passport.isAuthenticated, (req, res) => {
+    console.log("Fetching all decks.")
     res.json(req.user.decks);
   })
   .post(passport.isAuthenticated, async (req, res) => {
@@ -108,8 +109,6 @@ userRouter
           }
         }
       }
-
-      console.log(newDeck);
       req.user.decks.push(newDeck);
       try {
         await req.user.save();
@@ -118,6 +117,10 @@ userRouter
         console.error(err);
         return res.sendStatus(500);
       }
+
+      // req.user.decks=[];
+      // req.user.save();
+
     }
 
     return res.sendStatus(400);

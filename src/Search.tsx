@@ -38,9 +38,11 @@ const Search = (props: ISearch) => {
       <button type="submit" name="search" onClick={handleSearch}>
         Search
       </button>
-      {cardName && <Card name={cardName} click={handleClick} />}
     </div>
   );
 };
+
+// TODO: get Card to look up the image if it's not passed as a prop
+// {cardName && <Card name={cardName} click={handleClick} />}
 
 export default Search;

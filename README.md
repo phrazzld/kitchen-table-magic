@@ -22,7 +22,21 @@ cd kitchen-table-magic
 yarn install
 ```
 
-Then start the app locally:
+[Now get Node installed](https://nodejs.org/en/download/). Node will be used to run the api server on your own machine.
+
+[You'll also need MongoDB](https://www.mongodb.com/download-center/community?jmp=docs). Once MongoDB is done installing, start up a local database daemon:
+
+```
+mongod
+```
+
+Then, startup a local api server:
+
+```
+yarn serve
+```
+
+Finally, start the app locally:
 
 ```
 yarn start

@@ -1,57 +1,57 @@
 import React from "react";
 import "./App.css";
-import GameHUD from "./GameHUD";
-import { getCurrentUser } from "./Login";
+import Game from "./Game";
+import Table from "./Table";
+import Deck from "./Deck";
 import { useParams, Redirect } from "react-router-dom";
 import io from "socket.io-client";
 
-interface ILobby {}
+interface ILobby {
+  loggedIn: boolean;
+  email: string
+}
+
+interface IEnemyDeckAssigned {
+  email: string,
+  deck: Deck
+}
 
 const Lobby = (props: ILobby) => {
-  const [loggedIn, setLoggedIn] = React.useState<boolean>(true);
   const [users, setUsers] = React.useState<string[]>([]);
   const [socket] = React.useState(() => io("/"));
   const { lobbyId } = useParams();
 
-  React.useEffect(() => {
-    const asyncOps = async () => {
-      const currentUser = await getCurrentUser();
-      setLoggedIn(currentUser.loggedIn);
-      if (currentUser.loggedIn) {
-        socket.emit("join", lobbyId, currentUser.email);
-        setUsers((users) => users.concat(currentUser.email));
-      }
-    };
-    asyncOps();
-  }, []);
+  const [enemyDecks, setEnemyDecks] = React.useState<Deck[]>([]);
 
   React.useEffect(() => {
-    if (loggedIn) {
-      socket.emit("pingRoom", lobbyId);
+    if (props.loggedIn && props.email) {
+      console.log(props.email)
+      socket.emit("join", lobbyId, props.email);
 
-      socket.on("userDisconnected", (userEmail: string) => {
-        setUsers((users) => {
-          const index = users.indexOf(userEmail.toString());
-          if (index !== -1) {
-            users.splice(index, 1);
-          }
-          return users;
-        });
+      socket.on("usersConnected", (userEmails: string[], decks: IEnemyDeckAssigned[]) => {
+        setUsers(userEmails);
+        decks = decks.filter((deck) => deck.email != props.email && deck.deck);
+        const typedDecks: Deck[] = decks.map((deck) => deck.deck);
+        setEnemyDecks(typedDecks);
       });
 
-      socket.on("userConnected", (userEmail: string) => {
-        setUsers((users) => users.concat(userEmail));
+
+      socket.on("refreshDecks", (decks: IEnemyDeckAssigned[]) => {
+        decks = decks.filter((deck) => deck.email != props.email && deck.deck);
+        const typedDecks: Deck[] = decks.map((deck) => deck.deck);
+        setEnemyDecks(typedDecks);
       });
 
-      socket.on("pongUser", (userId: string) => {
-        socket.emit("pong_user", userId);
-      });
     }
-  }, [loggedIn]);
+  }, [props.loggedIn, props.email]);
+
+  const shareDeck = (deck: Deck): void => {
+    socket.emit("shareDeck", lobbyId, deck);
+  }
 
   return (
     <div className="lobby">
-      {loggedIn ? <GameHUD users={users} /> : <Redirect to="/" />}
+      {props.loggedIn ? <Game users={users} shareDeck={shareDeck} enemyDecks={enemyDecks}/> : <Redirect to="/" />}
     </div>
   );
 };

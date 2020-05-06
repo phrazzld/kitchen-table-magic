@@ -35,6 +35,8 @@ const userRouter = require("./routers/userRouter.js");
 app.use("/", userRouter);
 
 const clients = [];
+const rooms = {};
+
 
 const addClient = (socket_id) => {
   clients.push({ socket_id });
@@ -45,16 +47,33 @@ const findClient = (socket_id) => {
 };
 
 const setRoom = (socket_id, room) => {
-  clients[findClient(socket_id)].room = room;
+  const client = clients[findClient(socket_id)]
+  client.room = room;
+  if(!rooms[room]) rooms[room] = {};
+  rooms[room][client.socket_id]=client;
 };
 
 const setEmail = (socket_id, email) => {
   clients[findClient(socket_id)].email = email;
 };
 
-const disconnectClient = (socket_id) => {
+const disconnectClient = (socket_id, room) => {
   clients.splice(findClient(socket_id), 1);
+  if(rooms[room] && rooms[room][socket_id]){
+    delete rooms[room][socket_id];
+  }
 };
+
+const setDeck = (socket_id, deck) => {
+  clients[findClient(socket_id)].deck = deck;
+}
+
+const fetchDecks = (room) => {
+  let usersInRoom = Object.keys(rooms[room]);
+  let decks = usersInRoom.map((user) => { return {deck: rooms[room][user].deck, email: rooms[room][user].email}});
+  return decks;
+}
+
 
 io.on("connection", (socket) => {
   console.log("a user connected");
@@ -68,25 +87,32 @@ io.on("connection", (socket) => {
     socket.room = room;
     setRoom(socket.id, room);
     setEmail(socket.id, email);
-    console.log(clients);
-    console.log(`joining lobby with id: ${room}`);
     socket.email = email;
-    socket.broadcast.to(room).emit("user_connected", socket.email);
+    const emails = Object.keys(rooms[room]).map((clientId) => rooms[room][clientId].email);
+    const decks = fetchDecks(room);
+    io.in(room).emit("usersConnected", emails, decks);
+  });
+
+  socket.on("shareDeck", (room, deck) => {
+    setDeck(socket.id, deck);
+    const decks = fetchDecks(room);
+    socket.to(room).emit("refreshDecks", decks);
   });
 
   socket.on("pingRoom", (room) => {
     console.log(`${socket.email} pinging`);
-    socket.to(room).emit("pong_user", socket.id);
+    socket.to(room).emit("pongUser", socket.id);
   });
 
   socket.on("pongUser", (userId) => {
     console.log(`${socket.email} ponging`);
-    io.to(userId).emit("user_connected", socket.email);
+    io.to(userId).emit("userConnected", socket.email);
   });
 
   socket.on("disconnect", () => {
-    socket.broadcast.to(socket.room).emit("user_disconnected", socket.email);
-    disconnectClient(socket.id);
+    socket.broadcast.to(socket.room).emit("userDisconnected", socket.email);
+    disconnectClient(socket.id, socket.room);
+    socket.disconnect();
   });
 });
 

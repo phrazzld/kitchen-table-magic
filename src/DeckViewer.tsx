@@ -1,7 +1,9 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Redirect } from "react-router-dom";
+import {generateId} from "./utils"
 
-interface ICard {
+
+export interface ICardData {
   _id: string;
   name: string;
   png: string;
@@ -13,18 +15,28 @@ export const getDeck = async (deckId: string) => {
     const parsedData = await deckData.json();
     return parsedData;
   }
+  throw new Error("No Deck ID");
 };
 
-const DeckViewer = () => {
+interface IDeckViewer {
+  loggedIn: boolean
+}
+
+const DeckViewer = (props: IDeckViewer) => {
   const [deckName, setDeckName] = React.useState<string>();
-  const [cards, setCards] = React.useState<ICard[]>([]);
+  const [cards, setCards] = React.useState<ICardData[]>([]);
 
   const { deckId } = useParams();
 
   React.useEffect(() => {
     const getDeckData = async () => {
       if (deckId) {
-        const deckData = await getDeck(deckId);
+        let deckData;
+        try {
+          deckData = await getDeck(deckId);
+        } catch (err) {
+          return console.error(err);
+        }
         if (deckData && deckData.name && deckData.cards) {
           setDeckName(deckData.name);
           setCards(deckData.cards);
@@ -35,18 +47,25 @@ const DeckViewer = () => {
   }, []);
 
   return (
-    <div className="deckViewer">
-      <h2>{deckName}</h2>
-      {cards.map((card) => (
-        <img
-          src={card.png}
-          alt={card.name}
-          style={{
-            height: "20em",
-          }}
-        />
-      ))}
-    </div>
+    <>
+      { props.loggedIn ? (
+        <div className="deckViewer">
+          <h2>{deckName}</h2>
+          {cards.map((card) => (
+            <img
+              src={card.png}
+              alt={card.name}
+              style={{
+                height: "20rem",
+              }}
+              key={generateId()}
+            />
+          ))}
+        </div>
+      ) : (
+        <Redirect to="/" />
+      )}
+    </>
   );
 };
 

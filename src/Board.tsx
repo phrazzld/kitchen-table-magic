@@ -44,7 +44,8 @@ const Board = (props: IBoard) => {
   ] = React.useState<ActiveCardMenu | null>(null);
   const [showLibraryMenu, setShowLibraryMenu] = React.useState<boolean>(false);
   const [showOverlay, setShowOverlay] = React.useState<boolean>(false);
-  const [overlayCard, setOverlayCard] = React.useState<string>("");
+  const [overlayCardName, setOverlayCardName] = React.useState<string>("");
+  const [overlayCardImageURL, setOverlayCardImageURL] = React.useState<string>("");
 
   const getCardsForZone = (zone: Zone): Array<CardData> => {
     return cards.filter((card: CardData) => card.zone === zone);
@@ -95,6 +96,7 @@ const Board = (props: IBoard) => {
 
   interface ICardMenu {
     cardId: string;
+    cardImage: string;
     cardName: string;
     coordinates: Coordinates;
   }
@@ -174,6 +176,7 @@ const Board = (props: IBoard) => {
 
   interface IOverlay {
     cardName: string;
+    cardImageURL: string
   }
 
   const Overlay = (props: IOverlay) => {
@@ -195,8 +198,10 @@ const Board = (props: IBoard) => {
         </h3>
         <Card
           name={props.cardName}
+          image={props.cardImageURL}
           click={() => {
-            setOverlayCard("");
+            setOverlayCardName("");
+            setOverlayCardImageURL("");
             setShowOverlay(false);
           }}
           style={{ height: "30em" }}
@@ -205,8 +210,9 @@ const Board = (props: IBoard) => {
     );
   };
 
-  const lookCloser = (cardName: string) => {
-    setOverlayCard(cardName);
+  const lookCloser = (cardName: string, cardImageURL: string) => {
+    setOverlayCardName(cardName);
+    setOverlayCardImageURL(cardImageURL)
     setShowOverlay(true);
   };
 
@@ -240,7 +246,7 @@ const Board = (props: IBoard) => {
             variant="contained"
             color="primary"
             onClick={() => {
-              lookCloser(props.cardName);
+              lookCloser(props.cardName, props.cardImage);
               setActiveCardMenu(null);
             }}
           >
@@ -253,7 +259,7 @@ const Board = (props: IBoard) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      {showOverlay && <Overlay cardName={overlayCard} />}
+      {showOverlay && <Overlay cardName={overlayCardName} cardImageURL={overlayCardImageURL} />}
       {activeCardMenu && (
         <OutsideClickHandler
           onOutsideClick={() => {
@@ -265,6 +271,7 @@ const Board = (props: IBoard) => {
           <CardMenu
             cardId={activeCardMenu.card.id}
             cardName={activeCardMenu.card.name}
+            cardImage={activeCardMenu.card.image}
             coordinates={activeCardMenu.coordinates}
           />
         </OutsideClickHandler>
@@ -277,6 +284,7 @@ const Board = (props: IBoard) => {
             <Card
               key={card.id}
               name={card.name}
+              image={card.image}
               click={event => handleClick(event, card)}
             />
           ))}
@@ -317,6 +325,7 @@ const Board = (props: IBoard) => {
           {getCardsForZone("GRAVEYARD")[0] && (
             <Card
               name={getCardsForZone("GRAVEYARD")[0].name}
+              image={getCardsForZone("GRAVEYARD")[0].image}
               click={event =>
                 handleClick(event, getCardsForZone("GRAVEYARD")[0])
               }
@@ -336,6 +345,7 @@ const Board = (props: IBoard) => {
           {getCardsForZone("EXILE")[0] && (
             <Card
               name={getCardsForZone("EXILE")[0].name}
+              image={getCardsForZone("EXILE")[0].image}
               click={event => handleClick(event, getCardsForZone("EXILE")[0])}
             />
           )}
@@ -347,6 +357,7 @@ const Board = (props: IBoard) => {
           <Card
             key={card.id}
             name={card.name}
+            image={card.image}
             click={event => handleClick(event, card)}
           />
         ))}

@@ -4,18 +4,22 @@ import React from "react";
 import styled from "styled-components";
 import { generateId } from "./utils";
 
+// TODO: get Card to look up the image if it's not passed as a prop
+
 export type Zone = "BATTLEFIELD" | "GRAVEYARD" | "EXILE" | "LIBRARY" | "HAND";
 
 export type CardData = {
   id: string;
   name: string;
+  image: string
   zone: Zone;
 };
 
-export const newCardData = (name: string): CardData => {
+export const newCardData = (name: string, image: string): CardData => {
   return {
     id: generateId(),
-    name: name,
+    name,
+    image,
     zone: "LIBRARY"
   };
 };
@@ -37,38 +41,21 @@ const CardImage = styled.img`
 
 interface ICard {
   name: string;
+  image: string;
   click: (event: any) => void;
   style?: any;
 }
 
 const Card = (props: ICard) => {
-  const [cardData, setCardData] = React.useState();
 
-  React.useEffect(() => {
-    const goSetCardData = async (name: string): Promise<void> => {
-      const res = await axios.get(
-        `https://api.scryfall.com/cards/named?exact=${name}`
-      );
-      setCardData(res.data);
-    };
-    const debounced = _.debounce(goSetCardData.bind(props.name), 1100, {
-      leading: true
-    });
-    debounced(props.name);
-  }, [props.name]);
-
-  if (cardData) {
-    return (
-      <CardImage
-        src={getCardImage(cardData)}
-        alt={`${cardData.name}: ${cardData.type_line}`}
-        style={props.style}
-        onClick={props.click}
-      />
-    );
-  }
-
-  return <p>Loading {props.name}</p>;
+  return (
+    <CardImage
+      src={props.image}
+      alt={props.name}
+      style={props.style}
+      onClick={props.click}
+    />
+  )
 };
 
 export default Card;

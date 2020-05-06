@@ -1,67 +1,46 @@
 import React from "react";
-import Board from "./Board";
-import Login from "./Login";
+import Login, { getCurrentUser } from "./Login";
 import Lobby from "./Lobby";
-import DeckViewer from "./DeckViewer"
+import DeckViewer from "./DeckViewer";
 import DeckEditor from "./DeckEditor";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Table from "./Table";
-import Deck from "./Deck";
-import { newCardData } from "./Card";
+import { getDeck } from "./DeckViewer";
 
 const App = () => {
-  const blackDeck: Deck = [
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Swamp"),
-    newCardData("Phage the Untouchable"),
-    newCardData("Dark Ritual"),
-    newCardData("Mox Diamond"),
-    newCardData("Black Lotus"),
-    newCardData("Damnation"),
-    newCardData("Yawgmoth's Will")
-  ];
+  const [loggedIn, setLoggedIn] = React.useState<boolean>(true);
+  const [userEmail, setUserEmail] = React.useState<string>("")
+  const [deck, setDeck] = React.useState();
 
-  const blueDeck: Deck = [
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Island"),
-    newCardData("Force of Will"),
-    newCardData("Ancestral Recall"),
-    newCardData("Talrand, Sky Summoner"),
-    newCardData("Counterspell"),
-    newCardData("Vizzerdrix")
-  ];
-
-  const decks: Array<Deck> = [blackDeck, blueDeck];
+  React.useEffect(() => {
+    const asyncLogin = async () => {
+      const loggedIn = await getCurrentUser();
+      setLoggedIn(loggedIn.loggedIn);
+      setUserEmail(loggedIn.email);
+    };
+    asyncLogin();
+  }, []);
 
   return (
     <Router>
       <Switch>
         <Route path="/game/:lobbyId">
-          <Lobby />
+          <Lobby loggedIn={loggedIn} email={userEmail}/>
         </Route>
         <Route path="/decks/:deckId">
-          <DeckViewer />
+          <DeckViewer loggedIn={loggedIn} />
         </Route>
         <Route path="/decks">
-          <DeckEditor />
+          <DeckEditor loggedIn={loggedIn} />
         </Route>
         <Route path="/">
-          <Login />
-          <Table decks={decks} />
+          <Login
+            loggedIn={loggedIn}
+            userEmail={userEmail}
+            setUserEmail={setUserEmail}
+            setLoggedIn={setLoggedIn}
+          />
+
         </Route>
       </Switch>
     </Router>

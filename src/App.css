@@ -38,10 +38,10 @@
 }
 
 .deckEditor {
-  float:left;
+  float: left;
 }
 
 .deckEditorList {
-  width: 500px;
-  float:right;
+  width: 30rem;
+  float: right;
 }
