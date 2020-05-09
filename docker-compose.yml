@@ -1,0 +1,38 @@
+version: "3"
+services:
+  mongo:
+    image: mongo:latest
+    networks:
+      - app-network
+    ports:
+      - 27017:27017
+  server:
+    build:
+      context: .
+      args:
+        - yarncmd=serve
+        - exposedport=8080
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/kitchen-table-magic
+    networks:
+      - app-network
+    depends_on:
+      - mongo
+    ports:
+      - 8080:8080
+  client:
+    build:
+      context: .
+      args:
+        - yarncmd=start
+        - exposedport=3000
+    networks:
+      - app-network
+    depends_on:
+      - server
+    ports:
+      - 3000:3000
+    stdin_open: true
+networks:
+  app-network:
+    driver: bridge
